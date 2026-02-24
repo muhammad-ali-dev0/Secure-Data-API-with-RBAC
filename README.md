@@ -2,8 +2,6 @@
 
  REST API demonstrating enterprise security engineering patterns: JWT authentication with token rotation, hierarchical role-based access control, per-role rate limiting, structured audit logging, and complete multi-tenant data isolation.
 
-> Built as a portfolio project targeting data engineering and backend API clients on Upwork.
-
 ---
 
 ## Architecture Overview
