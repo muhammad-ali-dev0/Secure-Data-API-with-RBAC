@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/secure_api
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-changeme_generate_with_openssl_rand_hex_32}
+      - ENVIRONMENT=development
+      - LOG_FORMAT=console
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app   # hot reload in dev
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: secure_api
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    # Used for rate limit storage in multi-instance deployments
+    # Uncomment slowapi Redis backend in app/core/limiter.py
+
+volumes:
+  postgres_data:
